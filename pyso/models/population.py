@@ -22,10 +22,3 @@ class Population:
                     sub_pop_particles.append(particles[0])
 
                 self.sub_populations.append(SubPopulation(sub_pop_particles))
-        elif topology_type == TopologyType.FOCAL.value:
-            self.sub_populations = []
-            center = particles[0]
-
-            for i in range(1, population_size):
-                sub_pop_particles = [center, particles[i]]
-                self.sub_populations.append(SubPopulation(sub_pop_particles))

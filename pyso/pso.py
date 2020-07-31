@@ -4,28 +4,35 @@ import random
 
 def optimize(function, population, num_iterations, initial_inertia_coeff, final_inertia_coeff, cognitive_coeff,
              social_coeff):
-    best_fitness_history = []
+    best_fitness = None
     inertia_coeff = initial_inertia_coeff
     inertia_rate = (initial_inertia_coeff - final_inertia_coeff) / num_iterations
 
-    for i in range(num_iterations):
+    for _ in range(num_iterations):
         update_population(population, function, inertia_coeff, cognitive_coeff, social_coeff, False)
-        best_fitness_history.append(function.fitness(population.best_position))
+        curr_fitness = function.fitness(population.best_position)
+
+        if best_fitness is None or best_fitness > curr_fitness:
+            best_fitness = curr_fitness
+
         inertia_coeff -= inertia_rate
 
-    return best_fitness_history
+    return best_fitness
 
 
 def optimize_with_clerc(function, population, num_iterations, cognitive_coeff, social_coeff):
-    best_fitness_history = []
+    best_fitness = None
     phi = cognitive_coeff + social_coeff
     clerc_coeff = 2 * random.random() / math.fabs(2 - phi - math.sqrt(phi ** 2 - 4 * phi))
 
     for i in range(num_iterations):
         update_population(population, function, clerc_coeff, cognitive_coeff, social_coeff, True)
-        best_fitness_history.append(function.fitness(population.best_position))
+        curr_fitness = function.fitness(population.best_position)
 
-    return best_fitness_history
+        if best_fitness is None or best_fitness > curr_fitness:
+            best_fitness = curr_fitness
+
+    return best_fitness
 
 
 def update_population(population, function, inertia_or_clerc_coeff, cognitive_coeff, social_coeff, use_clerc):
@@ -71,8 +78,8 @@ def update_particle(particle, sub_population, function, inertia_or_clerc_coeff, 
 
         new_position = particle_curr_pos + new_velocity
 
-        particle.curr_position[i] = update_attributes(new_position, function.lower_limit, function.upper_limit)
-        particle.velocity[i] = update_attributes(new_velocity, function.lower_limit / 5, function.upper_limit / 5)
+        particle.curr_position[i] = update_coord(new_position, function.lower_limit, function.upper_limit)
+        particle.velocity[i] = update_velocity(new_velocity, function.lower_limit, function.upper_limit)
 
     particle_curr_pos_fitness = function.fitness(particle.curr_position)
     particle_best_pos_fitness = function.fitness(particle.best_position)
@@ -81,10 +88,19 @@ def update_particle(particle, sub_population, function, inertia_or_clerc_coeff, 
         particle.best_position = particle.curr_position.copy()
 
 
-def update_attributes(new_value, lower_limit, upper_limit):
+def update_coord(new_value, lower_limit, upper_limit):
     if new_value > upper_limit:
-        return upper_limit
+        return random.uniform(0.6, 0.9) * upper_limit
     elif new_value < lower_limit:
-        return lower_limit
+        return random.uniform(0.6, 0.9) * lower_limit
+    else:
+        return new_value
+
+
+def update_velocity(new_value, lower_limit, upper_limit):
+    if new_value > upper_limit:
+        return 0.05 * upper_limit
+    elif new_value < lower_limit:
+        return 0.05 * lower_limit
     else:
         return new_value
