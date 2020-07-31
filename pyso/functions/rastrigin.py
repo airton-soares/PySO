@@ -1,4 +1,5 @@
 from functions.function import Function
+
 import math
 
 
@@ -8,7 +9,8 @@ class Rastrigin(Function):
         self.upper_limit = 5.12
 
     def fitness(self, position):
-        return sum([coord ** 2 - 10 * math.cos(2 * math.pi * coord) + 10 for coord in position])
+        dimension = len(position)
+        return (10 * dimension) + sum([(coord ** 2) - 10 * math.cos(2 * math.pi * coord) for coord in position])
 
     def compare_fitness(self, fitness_1, fitness_2):
         return fitness_1 < fitness_2
